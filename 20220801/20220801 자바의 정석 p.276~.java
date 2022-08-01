@@ -1,0 +1,316 @@
+import javax.security.auth.x500.X500Principal;
+
+20220801 자바의 정석 p.276~
+
+
+[예제 3]
+
+class Outer{
+    private int outerIv = 0;
+    static int outerCv = 0;
+
+    class InstanceInner{
+        // static 클래스는 외부 클래스의 인스턴스 멤버에 접근할 수 없다
+        // int siv = outerIv;
+    }
+
+    void myMethod(){
+        final int lv = 0; // 값이 바뀌지 않는 변수는 상수로 간주
+        final int Lv = 0;  //JDK 1.8 부터 final 생략 가능
+
+        class LocalInner{// 2. 지역 내부 클래스를 감싸고 있는 메서드의 상수만 사용가능.
+             int liv = outerIv;
+             int liv2 = outerCv;
+             // 외부 클래스의 지역변수는 final이 붙은 변수(상수)만 접근가능하다.
+             int liv3 = lv; // 에러!!! (JDK 1.8 부터 에러아님)
+             int liv4 = LV; // OK
+
+             void method(){
+                System.out.println(lv);
+             }
+        }
+    }
+}
+
+
+[예제 4]
+
+class Outer2{
+    class InstanceInner{
+        int iv = 100;
+    }
+
+    static class StaticInner{
+        int iv = 200;
+        static int cv = 300;
+    }
+
+    void myMethod(){
+        class LocalInner{
+            int iv = 400;
+        }
+    }
+}
+
+
+class Ex7_15{
+    public static void main(String[] args){
+        // 인스턴스클래스의 인스턴스를 생성하려면
+        // 외부 클래스의 인스턴스를 먼저 생성해야 한다.
+        Outer2 oc = new Outer2();
+        Outer2.InstanceInner ii = oc.new InstanceInner();
+
+        System.out.println("ii.iv :" + ii.iv);
+        System.out.println("Outer2.StaticInner.cv :" + Outer2.StaticInner.cv);
+
+        // static 내부 클래스의 인스턴스는 외부 클래스를 먼저 생성하지 않아도 된다.
+        Outer2.StaticInner si = new Outer2.StaticInner();
+        System.out.println("si.iv :" + si.iv)
+
+    }
+}
+
+// <결과>
+// ii.iv : 100
+// Outer2.StaticInner.cv : 300
+// si.iv : 200
+
+
+---------------------------------------------------------------------------------------------
+
+
+/* 익명 클래스 */
+- 이름이 없는 일회용 클래스. 정의와 생성을 동시에 하기 때문에 단 한번만 사용될 수 있고
+   오직 하나의 객체만을 생성할 수 있는 일회용 클래스이다.
+
+   new 조상클래스이름(){
+       // 멤버 선언
+   }
+
+   또는 
+
+   new 구현인터페이스 이름(){
+       // 멤버 선언
+   } 
+
+   [예제]
+
+   class Es_17{
+    Object iv = new Object(){void method(){}}; // 익명클래스
+    static Object cv = new Object(){void method(){}}; //익명클래스
+
+    void myMethod(){
+        Object lv = new Object(){void method(){}}; // 익명 클래스
+    }
+   }
+
+ -----------------------------------------------------------------------------------
+ 
+ 8강 예외처리
+
+ /* 프로그램 오류 */
+ - 컴파일 에러 : 컴파일 시에 발생하는 에러
+ - 런타임 에러 : 실행 시에 발생하는 에러
+ - 논리적 에러 : 실행은 되지만, 의도와 다르게 동작하는 것 
+
+ * java의 런타임 에러
+ - 에러(error) : 프로그램 코드에 의해서 수습될 수 없는 심각한 오류
+ - 예외(exception) : 프로그램 코드에 의해서 수습될 수 있는 다소 미약한 오류
+
+ * 에러(error)는 어쩔 수 없지만, 예외(exception)은 처리하자
+   
+
+ * 예외 처리의 정의와 목적
+ - 정의 : 프로그램 실행 시 발생할 수 있는 예외의 발생에 대비한 코드를 작성하는 것
+ - 목적 : 프로그램의 비정상 종료를 막고, 정상적인 실행상태를 유지하는 것
+
+ # Exception 클래스(+자손클래스)들 : 사용자의 실수와 같은 외적인 요인에 의해 발생하는 예외
+ # RuntimeException(+자손클래스) 클래스들 : 프로그래머의 실수로 발생하는 예외
+
+ -----------------------------------------------------------------------------------
+
+ /* 예외 처리하기 - try-catch문 */
+
+    try{
+        // 예외가 발생할 가능성이 있는 문장들을 넣는다.
+    } catch(Exception1 e1){
+        // Exception1이 발생했을 경우, 이를 처리하기 위한 문장을 적는다.
+    } catch(Exception2 e2){
+        // Exception2가 발생했을 경우, 이를 처리하기 위한 문장을 적는다.
+    } catch(ExceptionN eN){
+        // ExceptionN이 발생했을 경우, 이를 처리하기 위한 문장을 적는다.
+    }
+
+    cf) if 문과 달리, try 블럭이나 catch 블럭내에 포함된 문장이 하나뿐이어도 괄호{}를 생략할 수 없다. 
+
+
+    * try-catch문에서의 흐름
+    1. try블럭 내에서 예외가 발생한 경우
+        (1) 발생한 예외와 일치하는 catch블럭이 있는지 확인한다.
+        (2) 일치하는 catch블럭을 찾게 되면, 그 catch 블럭 내의 문장들을 수행하고 전체 try-catch문을
+             빠져나가서 그 다음 문장을 계속해서 수행한다. 만일 일치하는 catch블럭을 찾지 못하면, 
+             예외는 처리되지 못한다.
+    2. try블럭 내에서 예외가 발생하지 않는 경우,
+        (1) catch블럭을 거치지 않고 전체 try-catch문을 빠져나가서 수행을 계속한다.         
+
+
+ /* printStackTrace() 와 getMessage()  */
+
+ - printStackTrace() : 예외발생 당시의 호출스택(Call Stack)에 있었던 메서드의 정보와 예외 메시지를 
+                        화면에 출력한다.
+ - getMessage() : 발생한 예외 클래스의 인스턴스에 저장된 메시지를 얻을 수 있다.
+ 
+ 
+
+ /* 멀티 catch 블럭 */
+- 내용이 같은 catch 블럭을 하나로 합친 것 <- 중복된 코드를 줄일 수 있다.
+
+       Exception A 와 Exception B 의 공통 멤버만 사용 가능 
+
+
+/* 예외 발생시키기 */       
+- 키워드 throw를 사용해서 프로그래머가 고의로 예외를 발생시킬 수 있다.
+ 
+[방법]
+1. 연산자 new를 이용해서 발생시키려는 예외 클래스의 객체를 만든 다음
+      Exception e = new Exception("고의로 발생시켰음");
+2. 키워드 throw를 이용해서 예외를 발생시킨다.
+      throw e;
+      
+ <checked예외 / unchecked 예외> 
+ - checked 예외 : 컴파일러가 예외 처리 여부를 체크(예외 처리 필수)
+ - unchecked 예외 : 컴파일러가 예외 처리 여부를 체크 안함(예외 처리 선택)
+ 
+
+class Ex8_7{
+    public static void main(String[] args){
+        try{  // Exception과 그 자손은 반드시 예외처리를 해줘야 한다.(필수)
+            throw new Exception();   // Exception을 고의로 발생시킨다.
+        } catch(Exception e){}
+    
+    //  RuntimeException과 그 자손은 예외처리를 해주지 않아도 컴파일이 된다.
+    throw new RuntimeException();
+    }
+}
+
+------------------------------------------------------------------------------------
+
+/* 메서드에 예외 선언하기 */
+- 예외를 처리하는 방법 : try-catch 문, 예외 선언하기
+- 메서드가 호출시 발생가능한 예외를 호출하는 쪽에 알리는 것
+
+참고 : 예외를 발생시키는 키워드 throw와 예외를 메서드에 선언할 때 쓰이는 throws를 잘 구별하자.
+
+void method() throws Exception1, Exception2, ... ExceptionN{
+    // 메서드 내용
+}
+
+// method()에서 Exception과 그 자손 예외 발생 가능
+void method() throws Exception{
+    // 메서드 내용
+}
+
+
+
+(오버라이딩 조건)
+1. 선언부 일치
+2. 접근제어자 좁게 X.
+3. 조상보다 많은 예외 선언 X.
+
+ 
+
+/* finally 블럭 */
+- 예외 발생여부와 관계없이 수행되어야 하는 코드를 넣는다.
+
+try{
+    // 예외가 발생할 가능성이 있는 문장들을 넣는다.
+} catch(Exception1 e1){
+    // 예외처리를 위한 문장을 적는다.
+} finally{
+    // 예외의 발생여부에 관계없이 항상 수행되어야하는 문장들을 넣는다.
+    // finally블럭은 try-catch문의 맨 마지막에 위치해야한다.
+}
+
+참고 : try블럭 안에 return문이 있어서 try블럭을 벗어나갈 때도 finally블럭이 실행된다.
+
+
+/* 사용자 정의 예외 만들기 */
+
+- 우리가 직접 예외 클래스를 정의할 수 있다.
+- 조상은 Exception 과 RuntimeExceiption 중에서 선택
+
+ class MyException extends Exception{
+    MyException(String msg){  // 문자열을 매개변수로 받는 생성자
+        super(msg); // 조상인 Exception 클래스의 생성자를 호출한다.
+    }
+ }
+ 
+
+ /* 예외 되던지기(exception re-throwing) */
+ - 예외를 처리한 후에 다시 예외를 발생시키는 것
+ - 호출한 메서드와 호출된 메서드 양쪽 모두에서 예외처리하는 것
+
+-----------------------------------------------------------------------------------
+
+  cf) 짧굵배 블로그 - java
+
+  01. 예외처리
+  : 자바 프로그램에서 실행중 발생할 수 있는 예외적인 상황을 대비한 코드를 미리 만들어두는 것으로 문제 발생시 
+    좀 더 안전한 구조를 제공하며 문제 해결에 필요한 정보등을 제공할 수 있다.
+
+    // try-catch 블럭
+
+    # 예외 상황
+    - 특정 파일을 로딩하려고 할 때 파일이 해당 경로에 없는 경우
+    - 네트워크로 서버에 접속하는 경우 서버가 다운되었거나 네트웨크 연결에 문제가 있는 경우
+    - 문자열 데이터를 읽어 객체의 참조를 구하는 경우
+    - 정수를 0으로 나누는 경우
+
+    등 이러한 예외상황 환경에서 동작하는 클래스를 만들 때 해당 기능을 수행하는 메서드에 throws 구문을
+    추가해 특정 예외 상황 처리를 강제로 하게 된다.
+
+    예외 처리 클래스는 jav.lang.Exception 클래스를 부모로 하는 대표적인 클래스들이 있으며 사용자 정의
+    예외클래스에서 만드려면 Exception 클래스를 상속받아 구현하면 된다.
+
+
+--------------------------------------------------------------------------------------
+
+
+<이지업 자바 강의>
+
+  // VarEx05 -> main
+  // Note -> X
+
+    class Note{
+         int price = 2000;
+    }
+
+    public class VarEx05{
+
+        public static void main(String[] args){
+              Note note1 = new Note(); // heap 공간에 Note 클래스가 가지고 있는 모든 데이터를 할당해!!(대신 static은 제외하고)
+              Note note2 = new Note();
+              Note note3 = new Note();  // heap 공간
+              int age = 25  ;  // main stack 공간
+              System.out.println(age);
+              System.out.println(note1.price);
+              System.out.println(note2.price);
+              System.out.println(note3.price);
+
+              note3.price = 30000;
+              System.out.println(note1.price);
+              System.out.println(note2.price);
+              System.out.println(note3.price);
+
+       
+            }
+    }
+
+
+    class 붕어빵{
+        int price = 1000;
+        String taste = "달콤함";
+        String color = "노란색";
+    }
+
+
