@@ -1,0 +1,156 @@
+QuestionApiController 에 답변 부분 추가
+
+```java
+ @PostMapping("/api/question/{questionId}/answer")
+    public ResponseDto<Integer> answerSave(@RequestBody AnswerSaveRequestDto answerSaveRequestDto){
+        questionService.commentSave(answerSaveRequestDto);
+        return new ResponseDto<Integer>(HttpStatus.OK.value(), 1);
+    }
+
+    @DeleteMapping("/api/question/{questionId}/answer/{answerId}")
+    public ResponseDto<Integer> answerDelete(@PathVariable Long answerId){
+        questionService.commentDelete(answerId);
+        return new ResponseDto<Integer>(HttpStatus.OK.value(), 1);
+    }
+```
+
+QuestionService 에 답변 부분 추가
+
+```java
+package kr.ac.cnu.swacademy.cagong.service;
+
+import kr.ac.cnu.swacademy.cagong.dto.AnswerDto.AnswerSaveRequestDto;
+import kr.ac.cnu.swacademy.cagong.dto.QuestionDto.QuestionListResponseDto;
+import kr.ac.cnu.swacademy.cagong.dto.QuestionDto.QuestionResponseDto;
+import kr.ac.cnu.swacademy.cagong.dto.QuestionDto.QuestionUpdateRequestDto;
+import kr.ac.cnu.swacademy.cagong.entity.Question;
+import kr.ac.cnu.swacademy.cagong.repository.AnswerRepository;
+import kr.ac.cnu.swacademy.cagong.repository.QuestionRepository;
+import kr.ac.cnu.swacademy.cagong.dto.QuestionDto.QuestionSaveRequestDto;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RequiredArgsConstructor
+@Service
+public class QuestionService {
+
+    private final QuestionRepository questionRepository;
+    private final AnswerRepository answerRepository;
+
+    @Transactional
+    public Long save(QuestionSaveRequestDto requestDto) {
+        return questionRepository.save(requestDto.toEntity()).getId();
+    }
+
+    public QuestionResponseDto findById(Long id){
+        Question entity = questionRepository.findById(id).orElseThrow(() ->
+                new IllegalArgumentException("해당 질문이 없습니다. id=" + id));
+        return new QuestionResponseDto(entity);
+    }
+
+    @Transactional(readOnly = true)
+    public List<QuestionListResponseDto> findAllDesc(){
+        return questionRepository.findAllDesc().stream()
+                .map(QuestionListResponseDto::new)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public Long update(Long id, QuestionUpdateRequestDto requestDto) {
+        Question question = questionRepository.findById(id).orElseThrow(() ->
+                new IllegalArgumentException("해당 질문이 없습니다. id="+id));
+        question.update(requestDto.getTitle(), requestDto.getContent());
+        return id;
+    }
+
+    @Transactional
+    public void delete(Long id){
+        Question question = questionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 질문이 없습니다. id = " + id));
+        questionRepository.delete(question);
+    }
+
+    @Transactional
+    public void commentSave(AnswerSaveRequestDto answerSaveRequestDto) {
+        answerRepository.mSave(answerSaveRequestDto.getUserId(), answerSaveRequestDto.getQuestionId(), answerSaveRequestDto.getComment());
+    }
+
+    @Transactional
+    public void commentDelete(Long answerId){
+        answerRepository.deleteById(answerId);
+    }
+}
+```
+
+javascript에 답변부분 추가
+
+```javascript
+
+    answerSave: function(){
+        let data = {
+            userId: $("#userId").val(),
+            questionId: $("#questionId").val(),
+            comment: $("#answer-comment").val()
+        };
+
+        $.ajax({
+            type: "POST",
+            url: `/api/question/${data.questionId}/answer`,
+            data: JSON.stringify(data),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json"
+        }).done(function(resp){
+            alert("답변이 등록되었습니다.");
+            location.href = `/question/${data.questionId}`;
+        }).fail(function(error){
+            alert(JSON.stringify(error));
+        });
+    },
+    answerDelete : function(questionId, answerId){
+        $.ajax({
+            type: "DELETE",
+            url: `/api/question/${questionId}/answer/${answerId}`,
+            dataType: "json"
+        }).done(function(resp){
+            alert("답변이 삭제되었습니다.");
+            location.href = `/question/${questionId}`;
+        }).fail(function(error){
+            alert(JSON.stringify(error));
+        });
+    },
+```
+
+detail 에 답변 부분 추가
+
+```html
+<div class="card">
+            <form>
+<!--                <input type="hidden" id="userId" th:value="${#authentication.getPrincipal().user.id}"/>-->
+                <input type="hidden" id="questionId" th:value="${question.id}"/>
+                <div class="card-body">
+                    <textarea id="answer-comment" class="form-control" rows="1"></textarea>
+                </div>
+                <div class="card-footer">
+                    <button type="button" id="btn-answer-save" class="btn btn-primary">답변등록</button>
+                </div>
+            </form>
+        </div>
+        <br/>
+        <div class="card">
+            <div class="card-header">답변</div>
+            <ul id="answer-box" class="list-group">
+                <th:block th:each="answer : ${question.answers}">
+                    <li th:id="|answer-${answer.id}|" class=list-group-item d-flex justify-content-between>
+                        <div>[[${answer.comment}]]</div>
+                        <button th:onClick="|main.answerDelete(${question.id}, ${answer.id})|" class="btn btn-primary">답변삭제
+                        </button>
+                    </li>
+                </th:block>
+            </ul>
+        </div>
+    </div>
+```
