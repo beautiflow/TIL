@@ -1,0 +1,21 @@
+public class Main {
+    public static void main(String[] args){
+        int donPrice = 8000; // 돈까스 가격
+        int KalPrice = 10000; // 칼국수
+        int KingPrice = 5000; // 왕만두
+
+        int donNumber = 17; // 돈가스 수량
+        int kalNumber = 8; // 칼국수
+        int kingNumber = 1; // 왕만두
+
+        // 결과 출력
+        System.out.printf("%s x %2d = %6d\n", "돈가스", donNumber, donPrice * donNumber);
+        System.out.printf("%s x %2d = %6d\n", "칼국수", kalNumber, KalPrice * kalNumber);
+        System.out.printf("%s x %2d = %6d\n", "왕만두", kingNumber, KingPrice * kingNumber);
+        System.out.println("==================================");
+        
+        int sum = donPrice * donNumber + KalPrice * kalNumber + KingPrice * kingNumber;
+        System.out.printf("%s: %d\n", "총합", sum);
+    }
+    
+}

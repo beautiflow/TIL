@@ -1,0 +1,17 @@
+public class HwanJun{
+    public static void main(String[] args){
+
+        Scanner input = new Scanner(System.in);
+        int euro = input.nextInt();
+        int dallor = input.nextInt();
+        
+        // 환율 변수 생성
+        double eurRate = 1320.48026;
+        double dallarRate = 1063.82979;
+        
+        // 환전하기 및 출력
+        int won = (int)(euro * eurRate + dallor * dallarRate);
+        System.out.println("58유로 + 32달러 = " + won + "원");
+
+    }
+}

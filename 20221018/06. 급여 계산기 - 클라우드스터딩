@@ -1,0 +1,17 @@
+import java.util.Scanner;
+
+public class Alba{
+   // 메인 메소드
+   public static void main(String[] args){
+     
+    Scanner input = new Scanner(System.in); // 키보드로부터 입력받기 위한 변수 생성
+
+    int basePay = input.nextInt(); // 키보드로부터 정수값을 입력받아 시급에 대입
+    int workingHours = input.nextInt(); // 키보드로부터 정수값을 입력받아 일한 시간에 대입
+    int pay = basePay * workingHours;
+
+    System.out.println(pay);
+
+   }
+
+}
