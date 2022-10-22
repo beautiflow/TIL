@@ -1,0 +1,83 @@
+class Solution {
+    public int[] solution(int denum1, int num1, int denum2, int num2) {
+       
+       Scanner sc = new Scanner (System.in);
+
+       int a1 = sc.nextInt();
+       int b1 = sc.nextInt();
+
+       int a2 = sc.nextInt();
+       int b2 = sc.nextInt();
+
+       sc.close();
+
+       int a3 = a1 * b2 + a2 * b1;
+       int b3 = b1 * b2;
+
+       int gcd = getGCD(a3, b3);
+
+       System.out.println(a3 / gcd + " " + b3 /gcd);
+    }
+
+    public static int getGCD(int n, int m){
+        if (n%m == 0)
+            return m;
+    else
+    return getGCD(m, n%m)
+    }
+}
+
+/*
+ * 유클리드 호제법 구현 메서드 : 최대공약수를 구하는 알고리즘 
+ * @ param bn : 큰 숫자
+ * @ param sn : 작은 숫자
+ * @ return
+ * 큰 숫자를 작은 숫자로 나눈 값이 0 이면 작은 숫자 리턴, 아니면 재귀형태로 자신을 호출
+ * 
+*/
+
+public int eucd(int bn, int sn){
+    // 큰 숫자를 작은 숫자로 나눈 나머지를 계산
+    int r = bn % sn;
+
+    // 나머지가 0이면 작은 숫자가 최대공약수 이므로 작은 숫자 리턴 
+    if(r == 0){
+        return sn;
+    }else{
+        // 나머지가 0 이상이면 재귀형태로 호출
+        // 이때 파라미터는 작은 숫자와 나머지를 넣어줌 
+        return eucd(sn, r);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+ * public int eucd()
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
