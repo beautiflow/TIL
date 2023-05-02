@@ -1,18 +1,20 @@
+import java.util.*;
+
 class Solution {
     public int[] solution(int denum1, int num1, int denum2, int num2) {
        
-       Scanner sc = new Scanner (System.in);
+       Scanner sc = new Scanner(System.in);
 
-       int a1 = sc.nextInt();
-       int b1 = sc.nextInt();
+       int denum1 = sc.nextInt();
+       int num1 = sc.nextInt();
 
-       int a2 = sc.nextInt();
-       int b2 = sc.nextInt();
+       int denum2 = sc.nextInt();
+       int num2 = sc.nextInt();
 
        sc.close();
 
-       int a3 = a1 * b2 + a2 * b1;
-       int b3 = b1 * b2;
+       int a3 = denum1 * num2 + denum2 * num1;
+       int b3 = num1 * num2;
 
        int gcd = getGCD(a3, b3);
 
@@ -20,10 +22,11 @@ class Solution {
     }
 
     public static int getGCD(int n, int m){
-        if (n%m == 0)
+        if (n%m == 0){
             return m;
-    else
-    return getGCD(m, n%m)
+            }else{
+    return getGCD(m, n%m);
+    }
     }
 }
 
@@ -81,3 +84,35 @@ public int eucd(int bn, int sn){
  * 
  * 
  */
+
+
+
+class Solution{
+    public int[] solution(int denum1, int num1, int denum2, int num2){
+        int denum = denum1 * num2 + denum2 * num1;
+        int num = num1 * num2;
+
+        int gcd = getGCD(denum, num);
+
+        return new int[]{denum / gcd, num / gcd};
+    }
+
+    public int getGCD(int a, int b){
+        if(a%b == 0){
+            return b;
+        }
+
+        return getGCD(b, a%b);
+    }
+}
+
+/*
+*   분자 = denum
+*   분모 = num
+*
+*
+*
+*
+*
+*
+*/

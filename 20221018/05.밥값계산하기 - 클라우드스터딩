@@ -1,4 +1,4 @@
-public class Main {
+public class BobGap {
     public static void main(String[] args){
         int donPrice = 8000; // 돈까스 가격
         int KalPrice = 10000; // 칼국수
